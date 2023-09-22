@@ -1,1 +1,6 @@
-cout<<"hello World";
+#include<iostrem>
+using namespace std;
+int main(){
+    cout<<"hello World";
+}
+
