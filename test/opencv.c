@@ -4,6 +4,15 @@
 #include<iostream>
 using namespace std;
 using namespace cv;
+Mat Picture2Gray(Mat im2gray) {
+    Mat im1(im2gray.rows, im2gray.cols,CV_8U);
+    for (int i = 0; i < im2gray.rows; i++) {
+        for (int j = 0; j < im2gray.cols; j++) {
+            im1.at<uchar>(i, j) = 0.299 * im2gray.at<Vec3b>(i, j)[2] + 0.587 *im2gray.at<Vec3b>(i, j)[1] + 0.114 *im2gray.at<Vec3b>(i, j)[0];
+        }
+    }
+    return im1;
+}
 Mat transform(Mat A, Mat H)
 {
 // allocate array of all locations
@@ -20,15 +29,7 @@ int Idx;
 int homeX=Idx % Numcols;
 int homeY=Idx / Numcols;
 cout << H << endl;
-Mat Picture2Gray(Mat im2gray) {
-    Mat im1(im2gray.rows, im2gray.cols,CV_8U);
-    for (int i = 0; i < im2gray.rows; i++) {
-        for (int j = 0; j < im2gray.cols; j++) {
-            im1.at<uchar>(i, j) = 0.299 * im2gray.at<Vec3b>(i, j)[2] + 0.587 *im2gray.at<Vec3b>(i, j)[1] + 0.114 *im2gray.at<Vec3b>(i, j)[0];
-        }
-    }
-    return im1;
-}
+
 waitKey();
 for (Idx=0; Idx < size; ++Idx ){
 
@@ -72,9 +73,6 @@ for (Idx=0; Idx < size; ++Idx ){
         tranImg = tranImg - tranImg;
        cout <<     "Rows" << tranImg.rows << "cols" << tranImg.cols << "cha" <<  A.channels() << endl;
 
-int main()
-{
-    Mat inputImage = imread("C://Users//凱駿//Documents//GitHub//license_plate_recognition//test//testcar1.bmp",IMREAD_COLOR);
 
        waitKey();
        // Remap Image
@@ -116,6 +114,34 @@ return tranImg;
 int main()
 {
     Mat inputImage = imread("C://Users//凱駿//Documents//GitHub//license_plate_recognition//test//testcar1.bmp",IMREAD_COLOR);
+    cvtColor(inputImage, gray, COLOR_BGR2GRAY);
+    //find threshold
+    for(size_t y=0;y<gray.rows;y+=block){
+        for(size_t x=0;x<gray.cols;x+=block){
+            tot=0;
+            for(int i=0;i<block;i++){
+                for(int j=0;j<block;j++){
+                    unsigned char* row_ptr=gray.data+(y+i)*gray.cols;
+                    tot+=row_ptr[x+j];
+                }
+            }
+            th=tot/(block*block)*0.6;
+    //binarization
+            for(int i=0;i<block;i++){
+                for(int j=0;j<block;j++){
+                    unsigned char* row_ptr=gray.data+(y+i)*gray.cols;
+                    if(row_ptr[x+j]>th){
+                        row_ptr[x+j]=255;
+                    }
+                    else{
+                        row_ptr[x+j]=0;
+                    }
+                }
+            }
+        }
+     }
+    imshow("Gray",gray);
+    
     Mat outputImg;
     transform(inputImage,outputImg);
     cout<<"hello world\n";
